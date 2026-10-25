@@ -50,7 +50,7 @@
   //    หน้าตาตามตัวอย่าง: ชื่อ-สกุล, ที่อยู่, ค่าเลนส์, สถานที่/วันที่
   var film = {
     Id: "film-a4-2x5",
-    Name: "ติดซองฟิล์ม A4 2×5",
+    Name: "Sticker A4 2×5",
     PageWidthMm: 210,
     PageHeightMm: 297,
     Landscape: true,
