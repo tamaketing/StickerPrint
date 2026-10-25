@@ -98,7 +98,13 @@
     }
   });
   Object.defineProperty(StickerRecord.prototype, "idNo", {
-    get: function () { return this.get(FieldKeys.IdNo); }
+    get: function () {
+      var raw = trim(this.get(FieldKeys.IdNo));
+      if (!raw) return "";
+      // บางไฟล์กำกับท้ายเลขบัตร เช่น "3920100733910 (ปปส.)" → เก็บเฉพาะเลข 13 หลักที่พบ
+      var m = raw.match(/\d{13}/);
+      return m ? m[0] : raw;
+    }
   });
   Object.defineProperty(StickerRecord.prototype, "idNoValid", {
     get: function () { return /^\d{13}$/.test(this.idNo); }
@@ -390,7 +396,7 @@
       if (h === "f-name" || h === "fname" || h === "firstname" || h === "first name" || h === "ชื่อ") return FieldKeys.FirstName;
       if (h === "l-name" || h === "lname" || h === "lastname" || h === "last name" || h === "นามสกุล") return FieldKeys.LastName;
       if (h.indexOf("id") >= 0 && h.indexOf("no") >= 0) return FieldKeys.IdNo;
-      if (h.indexOf("บัตรประชาชน") >= 0) return FieldKeys.IdNo;
+      if (h.indexOf("บัตรประชาชน") >= 0 || h.indexOf("ประชาชน") >= 0) return FieldKeys.IdNo;
       if (h.indexOf("อายุ") >= 0) return FieldKeys.Age;
       // ไฟล์เดิมใช้หัว "(ปี)" เก็บอายุ (ค่าที่พบ 6–92 ปี) ไม่ใช่ปีเกิด
       if (h === "(ปี)" || h === "ปี") return FieldKeys.Age;
