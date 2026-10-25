@@ -10,7 +10,11 @@
  */
 window.APP_CONFIG = {
   appName: "พิมพ์สติ๊กเกอร์",
-  version: "1.2.1",
+  version: "1.3.0",
+
+  // ใช้แม่แบบนี้เพียงแบบเดียว (ตามรูปตัวอย่างที่งานต้องการ)
+  // ใส่ Id จาก templates.js เช่น "film-a4-2x5" หรือใส่ null เพื่อแสดงทุกแบบอีกครั้ง
+  onlyTemplate: "film-a4-2x5",
 
   // sha256("sticker2569") — เปลี่ยนก่อนส่งให้ลูกค้า!
   passwordHash: "67d5cbe0db3b22716f48f0cd5f697c20518d0a151886a12ebfdedceaffa77a03",

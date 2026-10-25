@@ -8,7 +8,11 @@
   var CFG = window.APP_CONFIG || {};
   var R = window.LabelRenderer;
   var F = window.StickerFields;
-  var TEMPLATES = window.BUILTIN_TEMPLATES || [];
+  var ALL_TEMPLATES = window.BUILTIN_TEMPLATES || [];
+  var ONLY_TPL = (window.APP_CONFIG && window.APP_CONFIG.onlyTemplate) || null;
+  var TEMPLATES = ONLY_TPL
+    ? ALL_TEMPLATES.filter(function (t) { return t.Id === ONLY_TPL; })
+    : ALL_TEMPLATES;
 
   var PAPER_SIZES = {
     a4: [210, 297],
@@ -1149,11 +1153,13 @@
         "</button>";
     });
 
-    html += '<button class="tpl-card" type="button" data-tpl="custom" aria-pressed="false">' +
-      '<span class="tpl-icon">⚙</span>' +
-      '<span class="tpl-body"><b>ตั้งค่ากระดาษเอง</b><span>กำหนดขนาด จำนวนช่อง ฟอนต์ และข้อความเอง</span></span>' +
-      '<span class="tpl-badge">อิสระ</span>' +
-      "</button>";
+    if (!ONLY_TPL) {
+      html += '<button class="tpl-card" type="button" data-tpl="custom" aria-pressed="false">' +
+        '<span class="tpl-icon">⚙</span>' +
+        '<span class="tpl-body"><b>ตั้งค่ากระดาษเอง</b><span>กำหนดขนาด จำนวนช่อง ฟอนต์ และข้อความเอง</span></span>' +
+        '<span class="tpl-badge">อิสระ</span>' +
+        "</button>";
+    }
 
     host.innerHTML = html;
     host.addEventListener("click", function (e) {
