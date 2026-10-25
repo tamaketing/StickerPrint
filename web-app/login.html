@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#2563eb">
+<title>เข้าสู่ระบบ — พิมพ์สติ๊กเกอร์</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='44' font-family='Tahoma,Arial,sans-serif' font-size='26' font-weight='bold' fill='%23fff' text-anchor='middle'%3ESP%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/config.js"></script>
+<script src="js/sha256.js"></script>
+<script src="js/auth.js"></script>
+</head>
+<body class="auth-body">
+
+<div class="auth-shell">
+  <div class="auth-card" id="authCard">
+    <div class="auth-brand">
+      <span class="logo">SP</span>
+      <span><b>พิมพ์สติ๊กเกอร์</b><span>StickerPrint Web</span></span>
+    </div>
+
+    <h1>เข้าสู่ระบบ</h1>
+    <p class="sub">กรอกรหัสผ่านที่ได้รับจากผู้ดูแลระบบ</p>
+
+    <form id="loginForm" novalidate>
+      <div class="auth-field">
+        <label for="password">รหัสผ่าน</label>
+        <div class="password-wrap">
+          <input id="password" class="inp" type="password" autocomplete="current-password"
+                 placeholder="••••••••" required autofocus>
+          <button id="btnEye" class="btn-eye" type="button" aria-label="แสดงรหัสผ่าน" title="แสดง/ซ่อนรหัสผ่าน">👁</button>
+        </div>
+      </div>
+
+      <div id="authError" class="auth-error hidden" role="alert"></div>
+
+      <div class="auth-row">
+        <label><input id="remember" type="checkbox"> จำฉันไว้ 30 วัน</label>
+        <span class="muted small">สำหรับเครื่องส่วนตัว</span>
+      </div>
+
+      <button id="btnLogin" class="btn btn-primary auth-submit" type="submit">เข้าสู่ระบบ</button>
+    </form>
+
+    <p class="auth-note">
+      🔒 ไฟล์ Excel ของคุณถูกอ่านและพิมพ์ในเบราว์เซอร์นี้เท่านั้น<br>
+      ไม่มีการอัปโหลดหรือเก็บข้อมูลบนเซิร์ฟเวอร์
+    </p>
+  </div>
+
+  <p class="auth-footer">StickerPrint Web · v<span id="appVersion">1.2.1</span></p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var cfg = window.APP_CONFIG || {};
+  document.getElementById("appVersion").textContent = cfg.version || "1.2.1";
+
+  if (window.Auth && window.Auth.isAuthed()) {
+    location.replace("app.html");
+    return;
+  }
+
+  var form = document.getElementById("loginForm");
+  var input = document.getElementById("password");
+  var error = document.getElementById("authError");
+  var card = document.getElementById("authCard");
+  var btn = document.getElementById("btnLogin");
+  var remember = document.getElementById("remember");
+
+  document.getElementById("btnEye").addEventListener("click", function () {
+    var showing = input.type === "text";
+    input.type = showing ? "password" : "text";
+    this.textContent = showing ? "👁" : "🙈";
+    this.setAttribute("aria-label", showing ? "แสดงรหัสผ่าน" : "ซ่อนรหัสผ่าน");
+    input.focus();
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    error.classList.add("hidden");
+
+    var password = input.value;
+    if (!password) {
+      showError("กรุณากรอกรหัสผ่าน");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "กำลังตรวจสอบ…";
+
+    var result = window.Auth.login(password, remember.checked);
+    if (!result.ok) {
+      btn.disabled = false;
+      btn.textContent = "เข้าสู่ระบบ";
+      showError(result.message || "รหัสผ่านไม่ถูกต้อง");
+      input.select();
+      return;
+    }
+
+    location.replace("app.html");
+  });
+
+  function showError(message) {
+    error.textContent = message;
+    error.classList.remove("hidden");
+    card.classList.remove("shake");
+    void card.offsetWidth;
+    card.classList.add("shake");
+  }
+
+  input.focus();
+})();
+</script>
+</body>
+</html>

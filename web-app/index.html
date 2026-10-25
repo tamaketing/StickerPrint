@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>พิมพ์สติ๊กเกอร์ — StickerPrint</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='44' font-family='Tahoma,Arial,sans-serif' font-size='26' font-weight='bold' fill='%23fff' text-anchor='middle'%3ESP%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/config.js"></script>
+<script src="js/sha256.js"></script>
+<script src="js/auth.js"></script>
+</head>
+<body class="auth-body">
+<div class="auth-shell">
+  <div class="auth-card" style="text-align:center">
+    <div class="auth-brand" style="justify-content:center">
+      <span class="logo">SP</span>
+      <span><b>พิมพ์สติ๊กเกอร์</b><span>StickerPrint Web</span></span>
+    </div>
+    <p class="sub" style="margin:0">กำลังพาไปหน้าที่ถูกต้อง…</p>
+    <p class="hint" id="fallback" style="display:none">
+      ถ้าเบราว์เซอร์ไม่พาไปเอง กรุณากด
+      <a href="login.html">เข้าสู่ระบบ</a> หรือ <a href="app.html">เปิดโปรแกรม</a>
+    </p>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var target = (window.Auth && window.Auth.isAuthed()) ? "app.html" : "login.html";
+  try {
+    location.replace(target);
+  } catch (e) {
+    document.getElementById("fallback").style.display = "block";
+  }
+  setTimeout(function () {
+    document.getElementById("fallback").style.display = "block";
+  }, 1200);
+})();
+</script>
+</body>
+</html>

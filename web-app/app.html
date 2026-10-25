@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#2563eb">
+<title>พิมพ์สติ๊กเกอร์ — StickerPrint</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='44' font-family='Tahoma,Arial,sans-serif' font-size='26' font-weight='bold' fill='%23fff' text-anchor='middle'%3ESP%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/app.css">
+<script src="js/config.js"></script>
+<script src="js/sha256.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  if (!window.Auth || !window.Auth.isAuthed()) {
+    location.replace("login.html");
+  }
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">SP</span>
+    <span class="brand-text"><b>พิมพ์สติ๊กเกอร์</b><small>StickerPrint</small></span>
+  </div>
+
+  <nav class="stepper" aria-label="ขั้นตอนการทำงาน">
+    <button class="st is-on" data-go="1" type="button"><span class="c">1</span><span class="lbl">เลือกข้อมูล</span></button>
+    <span class="bar" aria-hidden="true"></span>
+    <button class="st" data-go="2" type="button" disabled><span class="c">2</span><span class="lbl">เลือกรูปแบบป้าย</span></button>
+    <span class="bar" aria-hidden="true"></span>
+    <button class="st" data-go="3" type="button" disabled><span class="c">3</span><span class="lbl">พิมพ์</span></button>
+  </nav>
+
+  <div class="topbar-actions">
+    <button id="btnHelp" class="btn btn-ghost btn-sm" type="button">วิธีใช้</button>
+    <button id="btnLogout" class="btn btn-ghost btn-sm" type="button">ออกจากระบบ</button>
+  </div>
+</header>
+
+<main class="app-main">
+
+  <!-- ============================================================ STEP 1 -->
+  <section id="step1" class="step-panel">
+    <div class="page-head">
+      <h1>ขั้นที่ 1 — เลือกข้อมูลที่จะพิมพ์</h1>
+      <p>ลากไฟล์ Excel มาวางได้เลย หรือกดเลือกไฟล์ — ข้อมูลถูกอ่านในเครื่องคุณเท่านั้น ไม่มีการอัปโหลด</p>
+    </div>
+
+    <div class="grid2">
+      <div class="column">
+        <div class="card">
+          <h3 class="card-title">1) ไฟล์ข้อมูล</h3>
+
+          <div id="dropZone" class="dropzone" tabindex="0" role="button" aria-label="เลือกไฟล์ Excel">
+            <div class="drop-icon" aria-hidden="true">📄</div>
+            <div class="drop-big">ลากไฟล์ Excel มาวางตรงนี้</div>
+            <div class="drop-small">รองรับ .xls &nbsp;.xlsx &nbsp;.xlsm &nbsp;.csv</div>
+            <button id="btnPick" class="btn btn-primary" type="button">เลือกไฟล์…</button>
+            <input id="fileInput" type="file" accept=".xls,.xlsx,.xlsm,.csv,.txt" hidden>
+          </div>
+
+          <div id="fileLoaded" class="file-loaded hidden">
+            <div class="ok-badge" aria-hidden="true">✓</div>
+            <div class="file-info">
+              <b id="fileName">—</b>
+              <span id="fileMeta">—</span>
+            </div>
+            <button id="btnChangeFile" class="btn btn-outline btn-sm" type="button">เปลี่ยนไฟล์</button>
+          </div>
+
+          <div id="sheetRow" class="field-block hidden">
+            <label for="sheetSelect">ชีตข้อมูล</label>
+            <select id="sheetSelect" class="inp"></select>
+          </div>
+
+          <div id="warnId" class="notice warn hidden"></div>
+          <div id="parseNote" class="notice info hidden"></div>
+          <div id="demoNote" class="notice info hidden">นี่คือ <b>ข้อมูลตัวอย่าง</b> สำหรับลองใช้ — เลือกไฟล์จริงเมื่อพร้อม</div>
+
+          <p class="demo-line"><button id="btnDemo" class="link-btn" type="button">ลองใช้ข้อมูลตัวอย่าง (สมมติ)</button></p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">2) ค้นหาหรือเลือกเฉพาะบางกลุ่ม <small class="muted">(ไม่บังคับ)</small></h3>
+          <div class="field-row">
+            <input id="searchInput" class="inp grow" type="search" placeholder="พิมพ์ชื่อ เลขบัตร หรือชุมชน…" autocomplete="off">
+            <select id="tambonSelect" class="inp">
+              <option value="">ทุกตำบล / ชุมชน</option>
+            </select>
+          </div>
+          <div class="count-line">
+            <span id="countBadge">ยังไม่มีข้อมูล</span>
+            <button id="btnClearFilter" class="link-btn" type="button">ล้างตัวกรอง</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div class="table-head">
+          <h3 class="card-title">ตัวอย่างรายชื่อ</h3>
+          <span id="tableCount" class="badge">0</span>
+        </div>
+        <div class="table-wrap">
+          <table id="dataTable">
+            <thead>
+              <tr>
+                <th class="w-no">#</th>
+                <th>ชื่อ - สกุล</th>
+                <th>เลขบัตรประชาชน</th>
+                <th>ที่อยู่</th>
+                <th>สายตา / คัดกรอง</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p id="tableNote" class="hint">ข้อมูลจะแสดงหลังเลือกไฟล์</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ STEP 2 -->
+  <section id="step2" class="step-panel hidden">
+    <div class="page-head">
+      <h1>ขั้นที่ 2 — เลือกรูปแบบป้าย</h1>
+      <p>เลือกแบบป้ายที่มี แล้วเลือกข้อความที่อยากให้พิมพ์ — พรีวิวทางขวาจะเปลี่ยนตามทันที</p>
+    </div>
+
+    <div class="grid2">
+      <div class="column">
+        <div class="card">
+          <h3 class="card-title">1) แบบป้าย</h3>
+          <div id="templateList" class="template-list"></div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">2) ข้อความบนป้าย <span id="tokenHint" class="muted small"></span></h3>
+          <div id="tokenGrid" class="check-grid">
+            <label class="chk"><input type="checkbox" data-token="no" checked><span>ลำดับที่</span></label>
+            <label class="chk"><input type="checkbox" data-token="name" checked><span>ชื่อ - สกุล</span></label>
+            <label class="chk"><input type="checkbox" data-token="addr" checked><span>ที่อยู่</span></label>
+            <label class="chk"><input type="checkbox" data-token="id" checked><span>เลขบัตรประชาชน</span></label>
+            <label class="chk"><input type="checkbox" data-token="year"><span>ปีเกิด (พ.ศ.)</span></label>
+            <label class="chk"><input type="checkbox" data-token="lens" checked><span>ค่าสายตา</span></label>
+          </div>
+          <div id="tokenNote" class="notice info hidden">แม่แบบสำเร็จรูปนี้กำหนดข้อความและตำแหน่งไว้แล้ว — ใช้ปุ่ม “ตั้งค่ากระดาษเอง” หากต้องการแบบอิสระ</div>
+
+          <div id="logoBar" class="logo-bar hidden">
+            <div class="logo-thumb"><img id="logoThumb" alt="โลโก้บนป้าย"></div>
+            <div class="logo-info">
+              <b>โลโก้บนป้าย</b>
+              <span id="logoState">รูปเริ่มต้นของโปรแกรม</span>
+            </div>
+            <div class="logo-actions">
+              <button id="btnLogoPick" class="btn btn-outline btn-sm" type="button">เปลี่ยนโลโก้…</button>
+              <button id="btnLogoReset" class="btn btn-ghost btn-sm" type="button">คืนค่าเดิม</button>
+            </div>
+            <input id="logoInput" type="file" accept="image/*" hidden>
+          </div>
+        </div>
+
+        <details class="card settings-card" id="customSettings">
+          <summary>ตั้งค่ากระดาษเอง</summary>
+          <div class="settings-grid">
+            <label>กระดาษ
+              <select id="optPaper" class="inp">
+                <option value="a4">A4 (210 × 297 มม.)</option>
+                <option value="a5">A5 (148 × 210 มม.)</option>
+                <option value="a3">A3 (297 × 420 มม.)</option>
+                <option value="letter">Letter (216 × 279 มม.)</option>
+              </select>
+            </label>
+            <label>แนวกระดาษ
+              <select id="optLandscape" class="inp">
+                <option value="0">แนวตั้ง</option>
+                <option value="1">แนวนอน</option>
+              </select>
+            </label>
+            <label>ขอบซ้าย-ขวา (มม.)
+              <input id="optMarginX" class="inp" type="number" min="0" max="50" step="0.1" value="10">
+            </label>
+            <label>ขอบบน-ล่าง (มม.)
+              <input id="optMarginY" class="inp" type="number" min="0" max="50" step="0.1" value="10">
+            </label>
+            <label>คอลัมน์
+              <input id="optCols" class="inp" type="number" min="1" max="8" step="1" value="3">
+            </label>
+            <label>แถว
+              <input id="optRows" class="inp" type="number" min="1" max="20" step="1" value="8">
+            </label>
+            <label>ระยะห่างแนวนอน (มม.)
+              <input id="optGapX" class="inp" type="number" min="0" max="20" step="0.1" value="3">
+            </label>
+            <label>ระยะห่างแนวตั้ง (มม.)
+              <input id="optGapY" class="inp" type="number" min="0" max="20" step="0.1" value="3">
+            </label>
+            <label>ฟอนต์
+              <select id="optFont" class="inp">
+                <option value="Tahoma">Tahoma</option>
+                <option value="Leelawadee UI">Leelawadee UI</option>
+                <option value="TH Sarabun New">TH Sarabun New</option>
+                <option value="Angsana New">Angsana New</option>
+                <option value="Noto Sans Thai">Noto Sans Thai</option>
+                <option value="Arial">Arial</option>
+              </select>
+            </label>
+            <label>ขนาดตัวอักษร (pt)
+              <input id="optFontSize" class="inp" type="number" min="4" max="30" step="0.5" value="10">
+            </label>
+            <label>จัดตำแหน่ง
+              <select id="optAlign" class="inp">
+                <option value="Left">ชิดซ้าย</option>
+                <option value="Center">กึ่งกลาง</option>
+                <option value="Right">ชิดขวา</option>
+              </select>
+            </label>
+            <label class="chk-inline"><input id="optBorders" type="checkbox" checked> เส้นกรอบป้าย</label>
+            <label class="chk-inline"><input id="optRestart" type="checkbox"> เริ่มเลขใหม่ทุกหน้า</label>
+          </div>
+          <p class="hint">แบบป้าย “ตั้งค่าเอง” ใช้ค่าจากช่องเหล่านี้ — ขยับตำแหน่งทั้งแผ่นได้ในขั้นที่ 3</p>
+        </details>
+      </div>
+
+      <div class="card preview-card">
+        <div class="table-head">
+          <h3 class="card-title">ตัวอย่างหน้ากระดาษ</h3>
+          <span id="specBadge" class="badge"></span>
+        </div>
+        <div class="preview-stage" id="previewStage">
+          <div class="preview-empty">เลือกไฟล์ข้อมูลก่อนเพื่อดูตัวอย่าง</div>
+        </div>
+        <div class="pager">
+          <button id="btnPrevPage" class="btn btn-outline btn-sm" type="button">◀ ก่อนหน้า</button>
+          <span id="pageLabel">หน้า 0 / 0</span>
+          <button id="btnNextPage" class="btn btn-outline btn-sm" type="button">ถัดไป ▶</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ STEP 3 -->
+  <section id="step3" class="step-panel hidden">
+    <div class="page-head">
+      <h1>ขั้นที่ 3 — พิมพ์</h1>
+      <p>แนะนำให้ทดลองพิมพ์หน้าแรก 1 แผ่น เพื่อดูว่าป้ายตรงกับกระดาษ แล้วค่อยพิมพ์ทั้งหมด</p>
+    </div>
+
+    <div class="summary-grid">
+      <div class="sum-tile"><b id="sumLabels">0</b><span>ป้ายทั้งหมด</span></div>
+      <div class="sum-tile"><b id="sumPages">0</b><span>หน้ากระดาษ</span></div>
+      <div class="sum-tile"><b id="sumMode" class="sum-mode">—</b><span>แบบป้าย</span></div>
+    </div>
+
+    <div class="print-actions">
+      <button id="btnTrial" class="action-card" type="button">
+        <span class="ico" aria-hidden="true">🖨</span>
+        <span class="action-text"><b>ทดลองพิมพ์ 1 หน้า</b><small>เช็กตำแหน่งก่อนพิมพ์จริง ประหยัดป้าย</small></span>
+      </button>
+      <button id="btnPrintAll" class="action-card primary" type="button">
+        <span class="ico" aria-hidden="true">🖨</span>
+        <span class="action-text"><b id="printAllLabel">พิมพ์ทั้งหมด</b><small>พิมพ์สติ๊กเกอร์ทั้งงาน</small></span>
+      </button>
+      <button id="btnPdf" class="action-card" type="button">
+        <span class="ico" aria-hidden="true">📄</span>
+        <span class="action-text"><b>บันทึกเป็น PDF</b><small>เก็บไว้พิมพ์ทีหลังได้</small></span>
+      </button>
+      <button id="btnPng" class="action-card" type="button">
+        <span class="ico" aria-hidden="true">🖼</span>
+        <span class="action-text"><b>บันทึกภาพ PNG</b><small>เฉพาะหน้าที่กำลังดู (300 dpi)</small></span>
+      </button>
+    </div>
+
+    <div class="card checklist">
+      <div class="check-row"><span class="dot ok" id="checkData">✓</span><span>เลือกข้อมูลแล้ว</span></div>
+      <div class="check-row"><span class="dot ok" id="checkTpl">✓</span><span>เลือกรูปแบบป้ายแล้ว</span></div>
+      <div class="check-row"><span class="dot" id="checkTrial"></span><span id="checkTrialText">ยังไม่ได้ทดลองพิมพ์หน้าแรก</span></div>
+      <p class="hint" id="trialHint">💡 แนะนำให้กดทดลองพิมพ์ก่อน 1 แผ่น เพื่อกันป้ายเปลืองทั้งงาน</p>
+    </div>
+
+    <details class="card">
+      <summary>ป้ายไม่ตรงกระดาษ? ปรับตำแหน่งทั้งแผ่น</summary>
+      <p class="hint">กดลูกศรเพื่อขยับทั้งแผ่นทีละ 0.5 มม. ค่านี้จะถูกจำไว้ในเบราว์เซอร์นี้ให้ครั้งต่อไป</p>
+      <div class="nudge">
+        <span></span><button class="nudge-btn" data-dx="0" data-dy="-0.5" type="button" aria-label="ขยับขึ้น">▲</button><span></span>
+        <button class="nudge-btn" data-dx="-0.5" data-dy="0" type="button" aria-label="ขยับซ้าย">◀</button>
+        <div class="nudge-mid" id="nudgeValue">ตำแหน่งปกติ</div>
+        <button class="nudge-btn" data-dx="0.5" data-dy="0" type="button" aria-label="ขยับขวา">▶</button>
+        <span></span><button class="nudge-btn" data-dx="0" data-dy="0.5" type="button" aria-label="ขยับลง">▼</button><span></span>
+      </div>
+      <div class="field-row"><button id="btnNudgeReset" class="btn btn-outline btn-sm" type="button">คืนค่าเดิม</button></div>
+    </details>
+
+    <div class="notice warn">
+      <b>ก่อนกดพิมพ์:</b> ในหน้าต่างพิมพ์ของเบราว์เซอร์ ให้เลือกเครื่องพิมพ์, ตั้ง <b>Margins = None</b> และปิด <b>Headers and footers</b> — ขนาดกระดาษจะถูกกำหนดให้อัตโนมัติ
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <div class="foot-note" id="footNote">ขั้นที่ 1 จาก 3</div>
+  <div class="foot-nav">
+    <button id="btnBack" class="btn btn-outline" type="button" disabled>← ย้อนกลับ</button>
+    <button id="btnNext" class="btn btn-primary" type="button" disabled>ถัดไป →</button>
+  </div>
+</footer>
+
+<div id="printRoot" aria-hidden="true"></div>
+
+<div id="busy" class="busy hidden" role="status" aria-live="polite">
+  <div class="busy-card">
+    <div class="spinner" aria-hidden="true"></div>
+    <b id="busyTitle">กำลังทำงาน…</b>
+    <span id="busyText"></span>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<dialog id="helpDialog" class="help-dialog">
+  <div class="help-head">
+    <h2>วิธีใช้แบบเร็ว</h2>
+    <button id="btnCloseHelp" class="btn btn-ghost btn-sm" type="button">ปิด</button>
+  </div>
+  <div class="help-body">
+    <ol>
+      <li><b>เลือกไฟล์</b> — ลากไฟล์ .xls / .xlsx / .xlsm / .csv มาวาง หรือกด “เลือกไฟล์…” (ข้อมูลอยู่ในเครื่อง ไม่ถูกส่งขึ้นเว็บ)</li>
+      <li><b>เลือกแบบป้าย</b> — “ติดซองฟิล์ม A4 2×5” สำหรับข้อมูลทั่วไป หรือ “ผลตรวจสายตา A4 2×5” สำหรับไฟล์ผลตรวจวัดสายตา</li>
+      <li><b>ทดลองพิมพ์ 1 หน้า</b> — เช็กว่าป้ายตรงกรอบกระดาษ ถ้าไม่ตรงใช้ปุ่มลูกศรขยับทีละ 0.5 มม.</li>
+      <li><b>พิมพ์ทั้งหมด</b> — หรือบันทึกเป็น PDF / PNG เก็บไว้ก่อนก็ได้</li>
+    </ol>
+    <p class="hint">ในหน้าต่างพิมพ์: เลือกเครื่องพิมพ์, Margins = None, ปิด Headers and footers, Scale = 100%</p>
+    <p class="hint">ไฟล์ Excel ไม่ถูกอัปโหลด — ทุกอย่างทำงานในเบราว์เซอร์ของคุณ</p>
+  </div>
+</dialog>
+
+<style id="printPageStyle"></style>
+
+<script src="libs/xlsx.full.min.js"></script>
+<script src="js/templates.js"></script>
+<script src="js/fields.js"></script>
+<script src="js/spreadsheet.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

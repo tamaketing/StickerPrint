@@ -1,0 +1,23 @@
+# ข้อมูลจริง / ไฟล์ส่วนบุคคล — ห้าม commit
+# กันไฟล์ Excel/CSV ทุกไฟล์ เพราะอาจมีชื่อ/เลขบัตรประชาชน (PDPA)
+*.xls
+*.xlsx
+*.xlsm
+*.csv
+*.mdb
+*.accdb
+
+# ไฟล์ชั่วคราว
+~$*
+*.tmp
+*.zip
+.tmp-test/
+Thumbs.db
+desktop.ini
+
+# Node
+node_modules/
+npm-debug.log*
+
+# ระบบ
+.DS_Store
